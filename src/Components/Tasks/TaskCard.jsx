@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   FaUser,
@@ -7,6 +7,7 @@ import {
   FaClipboardList,
   FaCheckCircle,
 } from "react-icons/fa";
+import {jwtDecode} from "jwt-decode";
 
 const TaskCard = ({
   _id,
@@ -23,19 +24,30 @@ const TaskCard = ({
   assignedRunner,
 }) => {
   const apiUrl = import.meta.env.VITE_API_URL;
+
   const [showRunners, setShowRunners] = useState(false);
   const [runners, setRunners] = useState([]);
   const [loadingRunners, setLoadingRunners] = useState(false);
   const [assigning, setAssigning] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [role, setRole] = useState("");
+
+  // Decode the role from JWT
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(token);
+      setRole(decoded.role); // Assuming `role` is part of the token payload
+    }
+  }, []);
 
   // Fetch runners
   const fetchRunners = async () => {
     try {
       setLoadingRunners(true);
-      const response = await axios.get(`${apiUrl}/api/auth/users/runner`); // Replace with your API base URL
-      setRunners(response.data.data); // Assuming the API returns the runners in `data.data`
+      const response = await axios.get(`${apiUrl}/api/auth/users/runner`);
+      setRunners(response.data.data);
       setLoadingRunners(false);
       setShowRunners(true);
     } catch (err) {
@@ -49,11 +61,11 @@ const TaskCard = ({
     try {
       setAssigning(true);
       const response = await axios.put(`${apiUrl}/api/tasks/assign`, {
-        taskId:_id,
+        taskId: _id,
         runnerId,
       });
       setSuccess(response.data.message);
-      setShowRunners(false); // Close the runners list after assignment
+      setShowRunners(false);
       setAssigning(false);
     } catch (err) {
       setError("Failed to assign task. Please try again.");
@@ -61,15 +73,35 @@ const TaskCard = ({
     }
   };
 
+  // Mark task as complete
+  const markAsComplete = async () => {
+    try {
+      const response = await axios.put(`${apiUrl}/api/tasks/update/status`, {
+        taskId: _id,
+        status: "complete",
+      });
+      setSuccess(response.data.message);
+    } catch (err) {
+      setError("Failed to mark task as complete. Please try again.");
+    }
+  };
+
+  // Delete task
+  const deleteTask = async () => {
+    try {
+      const response = await axios.delete(`${apiUrl}/api/tasks/delete/${_id}`);
+      setSuccess(response.data.message);
+    } catch (err) {
+      setError("Failed to delete task. Please try again.");
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-96 lg:w-96 mx-auto mb-6">
-      {/* Task Title */}
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-gray-600 mb-4">{description}</p>
 
-      {/* Task Details */}
       <div className="space-y-4">
-        {/* Category & Priority */}
         <div className="flex items-center text-gray-700">
           <FaClipboardList className="mr-2" />
           <span className="font-semibold">Category:</span> {category}
@@ -78,15 +110,11 @@ const TaskCard = ({
           <FaCheckCircle className="mr-2" />
           <span className="font-semibold">Priority:</span> {priority}
         </div>
-
-        {/* Scheduled Time */}
         <div className="flex items-center text-gray-700">
           <FaClock className="mr-2" />
           <span className="font-semibold">Scheduled Time:</span>{" "}
           {scheduledTime}
         </div>
-
-        {/* Pickup & Dropoff Locations */}
         <div className="flex items-center text-gray-700">
           <FaMapMarkerAlt className="mr-2" />
           <span className="font-semibold">Pickup Location:</span>{" "}
@@ -99,24 +127,20 @@ const TaskCard = ({
         </div>
       </div>
 
-      {/* Customer and Status Information */}
       <div className="space-y-4 mt-6">
         <div className="flex items-center text-gray-700">
           <FaUser className="mr-2" />
           <span className="font-semibold">Customer:</span> {customerName}
         </div>
-
         <div className="flex items-center text-gray-700">
           <span className="font-semibold">Assigned Runner:</span>{" "}
           {isRunnerAssigned ? assignedRunner : "No Runner Assigned"}
         </div>
-
         <div className="flex items-center text-gray-700">
           <span className="font-semibold">Progress:</span> {status}
         </div>
       </div>
 
-      {/* Success/Error Messages */}
       {success && (
         <div className="bg-green-100 text-green-700 p-2 mt-2 rounded text-sm">
           {success}
@@ -128,14 +152,34 @@ const TaskCard = ({
         </div>
       )}
 
-      {/* Assign Task Button */}
-      {!isRunnerAssigned && (
+      {/* Admin: Assign Task Button */}
+      {role === "admin" && !isRunnerAssigned && (
         <button
           onClick={fetchRunners}
           disabled={loadingRunners || assigning}
           className="text-white bg-sky-600 p-2 font-medium rounded w-full mt-4 hover:bg-sky-700"
         >
           {loadingRunners ? "Loading Runners..." : "Assign Task"}
+        </button>
+      )}
+
+      {/* Runner: Mark as Complete Button */}
+      {role === "runner" && status !== "complete" && (
+        <button
+          onClick={markAsComplete}
+          className="text-white bg-green-600 p-2 font-medium rounded w-full mt-4 hover:bg-green-700"
+        >
+          Mark as Complete
+        </button>
+      )}
+
+      {/* Admin/Customer: Delete Task Button */}
+      {(role === "admin" || role === "customer") && (
+        <button
+          onClick={deleteTask}
+          className="text-white bg-red-600 p-2 font-medium rounded w-full mt-4 hover:bg-red-700"
+        >
+          Delete Task
         </button>
       )}
 

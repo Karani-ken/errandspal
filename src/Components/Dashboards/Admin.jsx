@@ -4,16 +4,17 @@ import axios from "axios";
 import { FaTasks, FaUserPlus, FaClipboardCheck } from "react-icons/fa";
 import AddRunner from "../Runners/AddRunner";
 
+const apiUrl = import.meta.env.VITE_API_URL;
 // Function to fetch tasks
 const fetchTasks = async () => {
-  const response = await axios.get("http://localhost:5000/api/tasks/all");
+  const response = await axios.get(`${apiUrl}/api/tasks/all`);
   const tasks = response?.data?.data || [] ;
 
   // Categorize tasks based on their status
   return {
     new: tasks.filter((task) => task.status === "pending"),
     inProgress: tasks.filter((task) => task.status === "in_progress"),
-    completed: tasks.filter((task) => task.status === "completed"),
+    completed: tasks.filter((task) => task.status === "complete"),
   };
 };
 

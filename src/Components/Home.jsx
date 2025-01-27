@@ -145,7 +145,7 @@ const Home = () => {
                   Task tracking
                 </li>
               </ul>
-              <a href="#" className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">Start Now</a>
+              <a href="signup" className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">Start Now</a>
             </div>
 
             {/* Basic Plan */}

@@ -12,6 +12,8 @@ import Login from './Components/Auth/Login';
 import Signup from './Components/Auth/Signup';
 import ProtectedRoute from './Middlewares/ProtectedRoute';
 import Panels from './Components/Dashboards/Panels';
+import PaymentPage from './Components/Payments/PaymentPage';
+import SubscriptionPlans from './Components/Subscriptions/SubscriptionPlans';
 
 
 function App() {
@@ -40,7 +42,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/plans"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <SubscriptionPlans />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
+        
       </div>
     </Router>
   )

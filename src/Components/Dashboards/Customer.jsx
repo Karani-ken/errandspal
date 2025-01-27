@@ -38,8 +38,8 @@ const Customer = () => {
   });
   
   // Logic to separate tasks by status
-  const inProgressTasks = data?.filter((task) => task.status === "pending") || [];
-  const completedTasks = data?.filter((task) => task.status === "completed") || [];
+  const inProgressTasks = data?.filter((task) => task.status === "in_progress") || [];
+  const completedTasks = data?.filter((task) => task.status === "complete") || [];
 
   const handleOpenAddTask = () => setIsOpen(true);
   const handleCloseAddTask = () => setIsOpen(false);

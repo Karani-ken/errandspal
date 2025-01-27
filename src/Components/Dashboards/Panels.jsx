@@ -7,7 +7,7 @@ const Panels = () => {
     return (
         <div>
             <Menubar toggleSideBar={toggleSideBar} setToggleSideBar={setToggleSideBar} />
-            <Sidebar toggleSideBar={toggleSideBar} />
+            <Sidebar toggleSideBar={toggleSideBar} setToggleSideBar={setToggleSideBar}/>
         </div>
     )
 }
